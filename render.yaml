@@ -1,0 +1,37 @@
+# Render Blueprint — https://render.com/docs/infrastructure-as-code
+# After connect: set secrets in the dashboard (MONGODB_URL, etc.).
+# Frontend: set NEXT_PUBLIC_API_BASE_URL to your API URL + /api/v1, then redeploy web.
+#
+# Example: API at https://glimmora-api.onrender.com →
+#   NEXT_PUBLIC_API_BASE_URL=https://glimmora-api.onrender.com/api/v1
+
+services:
+  - type: web
+    name: glimmora-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /docs
+    envVars:
+      - key: MONGODB_URL
+        sync: false
+      - key: DATABASE_NAME
+        value: sow_generator
+      - key: SECRET_KEY
+        generateValue: true
+      - key: OTP_DRY_RUN
+        value: "true"
+
+  - type: web
+    name: glimmora-web
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      # Replace with your real API URL after glimmora-api is live (must include /api/v1, no trailing slash)
+      - key: NEXT_PUBLIC_API_BASE_URL
+        sync: false
