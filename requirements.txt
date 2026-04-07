@@ -1,0 +1,2 @@
+# Repo root shim for hosts (e.g. Render) that build from monorepo root without Root Directory.
+-r backend/requirements.txt
